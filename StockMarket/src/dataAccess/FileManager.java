@@ -14,6 +14,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import weka.core.Instances;
+import weka.core.converters.ArffSaver;
 
 /**
  *
@@ -32,7 +34,8 @@ public class FileManager {
 
         try {
             br = new BufferedReader(new FileReader(raw_path));
-            System.out.println("[FILE MANAGER] header: " + br.readLine());
+            br.readLine();
+            //System.out.println("[FILE MANAGER] header: " + br.readLine());
             while ((line = br.readLine()) != null) {
 
                 String[] fields = line.split(SEPARATOR);
@@ -61,8 +64,8 @@ public class FileManager {
         }
 
     }
-    
-    public static boolean saveDataSet(Acao dataSet, String file_path){
+
+    public static boolean saveDataSet(Acao dataSet, String file_path) {
         boolean saved = false;
         FileWriter writeFile = null;
 
@@ -79,6 +82,17 @@ public class FileManager {
         }
         return saved;
     }
-    
+
+    public static void save(Instances dataSet, String file_path) {
+        ArffSaver saver = new ArffSaver();
+        saver.setInstances(dataSet);
+        try {
+            saver.setFile(new File(file_path));
+            //saver.setDestination(new File("./data/test.arff"));   // **not** necessary in 3.5.4 and later
+            saver.writeBatch();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }
