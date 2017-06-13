@@ -29,7 +29,7 @@ public class TestDataSetLoader {
         Acao vale = FileManager.loadRawData("Vale S/A", "VALE5", raw_path);
         FileManager.saveDataSet(vale, dataSet_path);
         
-        Instances vale_discretizade = Discretizator.discretize(vale,4);
+        Instances vale_discretizade = Discretizator.discretize(vale,5);
         
         FileManager.save(vale_discretizade,arff_path);
         

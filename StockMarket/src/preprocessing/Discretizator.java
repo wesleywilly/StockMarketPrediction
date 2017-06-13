@@ -119,7 +119,7 @@ public class Discretizator {
         List<double[]> msd = getMeansAndStandardDeviation(original.getHistorico());
 
         //Discretizing and inserting instances
-        for (int i = window; i < original.getHistorico().size(); i++) {
+        for (int i = window+1; i < original.getHistorico().size(); i++) {
             double[] values = new double[5 * (window + 1)];
 
             //Abertura
@@ -162,9 +162,9 @@ public class Discretizator {
 
                 //Fechamento
                 if (i > 0) {
-                    if (original.getHistorico().get(i-(window-j)).getFechamento() > original.getHistorico().get(i - 1).getFechamento()) {
+                    if (original.getHistorico().get(i-(window-j)).getFechamento() > original.getHistorico().get(i -(window-j)- 1).getFechamento()) {
                         values[FECHAMENTO+(5*j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_ALTA);
-                    } else if (original.getHistorico().get(i-(window-j)).getFechamento() < original.getHistorico().get(i - 1).getFechamento()) {
+                    } else if (original.getHistorico().get(i-(window-j)).getFechamento() < original.getHistorico().get(i-(window-j) - 1).getFechamento()) {
                         values[FECHAMENTO+(5*j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
                     } else {
                         values[FECHAMENTO+(5*j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
