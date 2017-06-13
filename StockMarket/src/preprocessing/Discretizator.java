@@ -16,8 +16,8 @@ import weka.core.*;
  */
 public class Discretizator {
 
-    private static final String V_ALTA = "A";
-    private static final String V_BAIXA = "B";
+    private static final String V_ALTA = "P";
+    private static final String V_BAIXA = "N";
     private static final String V_IGUAL = "I";
 
     private static final String V_ALTO = "A";
@@ -30,13 +30,15 @@ public class Discretizator {
     private static final int VOLUME = 3;
     private static final int FECHAMENTO = 4;
 
+    private static final int YEAR = 240;
+
     /**
      * Transform numeric values to nominal using mean and standard deviation
      *
      * @param original
      * @return Weka Data Set
      */
-    public static Instances discretize(Acao original) {
+    private static Instances discretize(Acao original) {
         //Creating Dataset
         Instances dataset = generateEmptyNominalDataSet(original.getSimbolo(), original.getHistorico());
 
@@ -111,68 +113,92 @@ public class Discretizator {
      * @param window - get days before actual day and put as attributes
      * @return
      */
-    public static Instances discretize(Acao original, int window) {
+    public static Instances discretize(Acao original, int window, boolean use_windows_for_means_and_standard_deviation) {
         //Creating Dataset
         Instances dataset = generateEmptyNominalDataSet(original.getSimbolo(), original.getHistorico(), window);
 
         //Getting Means and Standard Deviation of all data
-        List<double[]> msd = getMeansAndStandardDeviation(original.getHistorico());
+        List<double[]> msd;// = getMeansAndStandardDeviation(original.getHistorico());
 
         //Discretizing and inserting instances
-        for (int i = window+1; i < original.getHistorico().size(); i++) {
-            double[] values = new double[5 * (window + 1)];
-
-            //Abertura
+        for (int i = window + 1; i < original.getHistorico().size(); i++) {
+            double[] values = new double[5 * (window + 1) - 4];
+            if (use_windows_for_means_and_standard_deviation) {
+                msd = getMeansAndStandardDeviation(original.getHistorico().subList(i - window, i));
+            } else {
+                //Getting Means and Standard Deviation of last year
+                if (i > YEAR) {
+                    msd = getMeansAndStandardDeviation(original.getHistorico().subList(i - YEAR, i));
+                } else {
+                    msd = getMeansAndStandardDeviation(original.getHistorico().subList(0, i));
+                }
+            }
+            //Window
             for (int j = 0; j <= window; j++) {
-
-                if (original.getHistorico().get(i-(window-j)).getAbertura() > msd.get(0)[ABERTURA] + msd.get(1)[ABERTURA]) {
-                    values[ABERTURA+(5*j)] = dataset.attribute(ABERTURA).indexOfValue(V_ALTO);
-                } else if (original.getHistorico().get(i-(window-j)).getAbertura() < msd.get(0)[ABERTURA] - msd.get(1)[ABERTURA]) {
-                    values[ABERTURA+(5*j)] = dataset.attribute(ABERTURA).indexOfValue(V_BAIXO);
-                } else {
-                    values[ABERTURA+(5*j)] = dataset.attribute(ABERTURA).indexOfValue(V_MEDIO);
-                }
-
-                //Baixa
-                if (original.getHistorico().get(i-(window-j)).getBaixa() > msd.get(0)[BAIXA] + msd.get(1)[BAIXA]) {
-                    values[BAIXA+(5*j)] = dataset.attribute(BAIXA).indexOfValue(V_ALTO);
-                } else if (original.getHistorico().get(i-(window-j)).getBaixa() < msd.get(0)[BAIXA] - msd.get(1)[BAIXA]) {
-                    values[BAIXA+(5*j)] = dataset.attribute(BAIXA).indexOfValue(V_BAIXO);
-                } else {
-                    values[BAIXA+(5*j)] = dataset.attribute(BAIXA).indexOfValue(V_MEDIO);
-                }
-
-                //Alta
-                if (original.getHistorico().get(i-(window-j)).getAlta() > msd.get(0)[ALTA] + msd.get(1)[ALTA]) {
-                    values[ALTA+(5*j)] = dataset.attribute(ALTA).indexOfValue(V_ALTO);
-                } else if (original.getHistorico().get(i-(window-j)).getAlta() < msd.get(0)[ALTA] - msd.get(1)[ALTA]) {
-                    values[ALTA+(5*j)] = dataset.attribute(ALTA).indexOfValue(V_BAIXO);
-                } else {
-                    values[ALTA+(5*j)] = dataset.attribute(ALTA).indexOfValue(V_MEDIO);
-                }
-
-                //Volume
-                if (original.getHistorico().get(i-(window-j)).getVolume() > msd.get(0)[VOLUME] + msd.get(1)[VOLUME]) {
-                    values[VOLUME+(5*j)] = dataset.attribute(VOLUME).indexOfValue(V_ALTO);
-                } else if (original.getHistorico().get(i-(window-j)).getVolume() < msd.get(0)[VOLUME] - msd.get(1)[VOLUME]) {
-                    values[VOLUME+(5*j)] = dataset.attribute(VOLUME).indexOfValue(V_BAIXO);
-                } else {
-                    values[VOLUME+(5*j)] = dataset.attribute(VOLUME).indexOfValue(V_MEDIO);
-                }
-
-                //Fechamento
-                if (i > 0) {
-                    if (original.getHistorico().get(i-(window-j)).getFechamento() > original.getHistorico().get(i -(window-j)- 1).getFechamento()) {
-                        values[FECHAMENTO+(5*j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_ALTA);
-                    } else if (original.getHistorico().get(i-(window-j)).getFechamento() < original.getHistorico().get(i-(window-j) - 1).getFechamento()) {
-                        values[FECHAMENTO+(5*j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
+                if (j == window) {
+                    //Fechamento
+                    if (i > 0) {
+                        if (original.getHistorico().get(i - (window - j)).getFechamento() > original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                            values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_ALTA);
+                        } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                            values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
+                        } else {
+                            values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                        }
                     } else {
-                        values[FECHAMENTO+(5*j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                        values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
                     }
-                } else {
-                    values[FECHAMENTO+(5*j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
-                }
 
+                } else {
+                    //Abertura
+                    if (original.getHistorico().get(i - (window - j)).getAbertura() > msd.get(0)[ABERTURA] + msd.get(1)[ABERTURA]) {
+                        values[ABERTURA + (5 * j)] = dataset.attribute(ABERTURA).indexOfValue(V_ALTO);
+                    } else if (original.getHistorico().get(i - (window - j)).getAbertura() < msd.get(0)[ABERTURA] - msd.get(1)[ABERTURA]) {
+                        values[ABERTURA + (5 * j)] = dataset.attribute(ABERTURA).indexOfValue(V_BAIXO);
+                    } else {
+                        values[ABERTURA + (5 * j)] = dataset.attribute(ABERTURA).indexOfValue(V_MEDIO);
+                    }
+
+                    //Baixa
+                    if (original.getHistorico().get(i - (window - j)).getBaixa() > msd.get(0)[BAIXA] + msd.get(1)[BAIXA]) {
+                        values[BAIXA + (5 * j)] = dataset.attribute(BAIXA).indexOfValue(V_ALTO);
+                    } else if (original.getHistorico().get(i - (window - j)).getBaixa() < msd.get(0)[BAIXA] - msd.get(1)[BAIXA]) {
+                        values[BAIXA + (5 * j)] = dataset.attribute(BAIXA).indexOfValue(V_BAIXO);
+                    } else {
+                        values[BAIXA + (5 * j)] = dataset.attribute(BAIXA).indexOfValue(V_MEDIO);
+                    }
+
+                    //Alta
+                    if (original.getHistorico().get(i - (window - j)).getAlta() > msd.get(0)[ALTA] + msd.get(1)[ALTA]) {
+                        values[ALTA + (5 * j)] = dataset.attribute(ALTA).indexOfValue(V_ALTO);
+                    } else if (original.getHistorico().get(i - (window - j)).getAlta() < msd.get(0)[ALTA] - msd.get(1)[ALTA]) {
+                        values[ALTA + (5 * j)] = dataset.attribute(ALTA).indexOfValue(V_BAIXO);
+                    } else {
+                        values[ALTA + (5 * j)] = dataset.attribute(ALTA).indexOfValue(V_MEDIO);
+                    }
+
+                    //Volume
+                    if (original.getHistorico().get(i - (window - j)).getVolume() > msd.get(0)[VOLUME] + msd.get(1)[VOLUME]) {
+                        values[VOLUME + (5 * j)] = dataset.attribute(VOLUME).indexOfValue(V_ALTO);
+                    } else if (original.getHistorico().get(i - (window - j)).getVolume() < msd.get(0)[VOLUME] - msd.get(1)[VOLUME]) {
+                        values[VOLUME + (5 * j)] = dataset.attribute(VOLUME).indexOfValue(V_BAIXO);
+                    } else {
+                        values[VOLUME + (5 * j)] = dataset.attribute(VOLUME).indexOfValue(V_MEDIO);
+                    }
+
+                    //Fechamento
+                    if (i > 0) {
+                        if (original.getHistorico().get(i - (window - j)).getFechamento() > original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                            values[FECHAMENTO + (5 * j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_ALTA);
+                        } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                            values[FECHAMENTO + (5 * j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
+                        } else {
+                            values[FECHAMENTO + (5 * j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                        }
+                    } else {
+                        values[FECHAMENTO + (5 * j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                    }
+                }
             }
             dataset.add(new DenseInstance(1.0, values));
 
@@ -240,35 +266,39 @@ public class Discretizator {
             classLabels.add(V_BAIXA);
 
             //Atributes
-            Attribute[] abertura = new Attribute[window+1];
-            Attribute[] baixa = new Attribute[window+1];
-            Attribute[] alta = new Attribute[window+1];
-            Attribute[] volume = new Attribute[window+1];
-            Attribute[] fechamento = new Attribute[window+1];
+            Attribute[] abertura = new Attribute[window];
+            Attribute[] baixa = new Attribute[window];
+            Attribute[] alta = new Attribute[window];
+            Attribute[] volume = new Attribute[window];
+            Attribute[] fechamento = new Attribute[window + 1];
 
             //Header
             ArrayList<Attribute> attributes = new ArrayList<>();
 
             for (int i = window; i >= 0; i--) {
-                abertura[window - i] = new Attribute("Abertura(" + (i * (-1)) + ")", attLabels);
-                baixa[window - i] = new Attribute("Baixa(" + (i * (-1)) + ")", attLabels);
-                alta[window - i] = new Attribute("Alta(" + (i * (-1)) + ")", attLabels);
-                volume[window - i] = new Attribute("Volume(" + (i * (-1)) + ")", attLabels);
-                fechamento[window - i] = new Attribute("Fechamento(" + (i * (-1)) + ")", classLabels);
+                if (i > 0) {
+                    abertura[window - i] = new Attribute("Abertura(" + (i * (-1)) + ")", attLabels);
+                    baixa[window - i] = new Attribute("Baixa(" + (i * (-1)) + ")", attLabels);
+                    alta[window - i] = new Attribute("Alta(" + (i * (-1)) + ")", attLabels);
+                    volume[window - i] = new Attribute("Volume(" + (i * (-1)) + ")", attLabels);
+                    fechamento[window - i] = new Attribute("Fechamento(" + (i * (-1)) + ")", classLabels);
 
-                attributes.add(abertura[window - i]);
-                attributes.add(baixa[window - i]);
-                attributes.add(alta[window - i]);
-                attributes.add(volume[window - i]);
-                attributes.add(fechamento[window - i]);
-
+                    attributes.add(abertura[window - i]);
+                    attributes.add(baixa[window - i]);
+                    attributes.add(alta[window - i]);
+                    attributes.add(volume[window - i]);
+                    attributes.add(fechamento[window - i]);
+                } else {
+                    fechamento[window - i] = new Attribute("Fechamento", classLabels);
+                    attributes.add(fechamento[window - i]);
+                }
             }
 
             //Dataset
             Instances dataset = new Instances(name, attributes, 0);
 
             //Defining class attribute
-            dataset.setClassIndex(FECHAMENTO + (5 * window));
+            dataset.setClassIndex(FECHAMENTO + (5 * window) - 4);
 
             return dataset;
         } else {
@@ -295,8 +325,8 @@ public class Discretizator {
             means[3] += historico.get(i).getVolume();
         }
 
-        for (double num : means) {
-            num = num / historico.size();
+        for (int i = 0; i < means.length; i++) {
+            means[i] = means[i] / historico.size();
         }
 
         //Getting standard Deviations

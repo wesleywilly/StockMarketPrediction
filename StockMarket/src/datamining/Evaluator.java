@@ -24,24 +24,26 @@ import weka.core.*;
  * @author wesley
  */
 public class Evaluator {
-    public static void evaluate(Instances dataset){
+    public static double evaluate(Instances dataset){
         String[] options = new String[1];
         options[0] = "-U";
 
         J48 classifier = new J48();
         
+        double correct = -1;
         try {
             Evaluation eval = new Evaluation(dataset);
             
-            classifier.setOptions(options);
+            //classifier.setOptions(options);
             
             eval.crossValidateModel(classifier, dataset, 2, new Random());
             
-            System.out.println(eval.toSummaryString("\nResults\n\n", false));
+            correct = eval.correct();
             
             
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return correct;
     }
 }

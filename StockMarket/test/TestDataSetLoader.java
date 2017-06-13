@@ -29,11 +29,17 @@ public class TestDataSetLoader {
         Acao vale = FileManager.loadRawData("Vale S/A", "VALE5", raw_path);
         FileManager.saveDataSet(vale, dataSet_path);
         
-        Instances vale_discretizade = Discretizator.discretize(vale,5);
+        Instances vale_discretizade = Discretizator.discretize(vale,5,true);
         
         FileManager.save(vale_discretizade,arff_path);
         
-        Evaluator.evaluate(vale_discretizade);
+        int size = vale_discretizade.size();
+        double correct = Evaluator.evaluate(vale_discretizade);
+        double pcorrect = (correct/size)*100;
+        
+        System.out.println("Instances = "+size+"\n"
+                            + "Hits = "+correct+"\n"
+                            + "% = "+pcorrect+"\n");
         
     }
     
