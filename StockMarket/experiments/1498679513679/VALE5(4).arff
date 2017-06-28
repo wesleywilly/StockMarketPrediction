@@ -1,0 +1,25 @@
+@relation VALE5(4)
+
+@attribute Abertura(-4) {A,M,B}
+@attribute Baixa(-4) {A,M,B}
+@attribute Alta(-4) {A,M,B}
+@attribute Volume(-4) {A,M,B}
+@attribute Fechamento(-4) {ALTA,BAIXA}
+@attribute Abertura(-3) {A,M,B}
+@attribute Baixa(-3) {A,M,B}
+@attribute Alta(-3) {A,M,B}
+@attribute Volume(-3) {A,M,B}
+@attribute Fechamento(-3) {ALTA,BAIXA}
+@attribute Abertura(-2) {A,M,B}
+@attribute Baixa(-2) {A,M,B}
+@attribute Alta(-2) {A,M,B}
+@attribute Volume(-2) {A,M,B}
+@attribute Fechamento(-2) {ALTA,BAIXA}
+@attribute Abertura(-1) {A,M,B}
+@attribute Baixa(-1) {A,M,B}
+@attribute Alta(-1) {A,M,B}
+@attribute Volume(-1) {A,M,B}
+@attribute Fechamento(-1) {ALTA,BAIXA}
+@attribute Fechamento {ALTA,BAIXA}
+
+@data

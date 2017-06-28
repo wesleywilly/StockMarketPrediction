@@ -53,7 +53,7 @@ public class Experiment {
         System.out.print("Generating arff datasets...");
         List<Instances> instances = new ArrayList<>();
         for(int i = 0; i<MAX_WINDOWS;i++){
-            instances.add(Discretizator.discretize(vale, i+1, true));
+            instances.add(Discretizator.discretize(vale, i+1, true,false));
             FileManager.save(instances.get(i), EXPERIMENTS_DIR+experiment_folder+QUOTE+"("+(i+1)+").arff");
         }
         System.out.println(" Done!");
@@ -67,6 +67,10 @@ public class Experiment {
             
             System.out.println("Starting test...");
             List<String> results = new ArrayList<String>();
+            
+            String header = "DataSet,Algorithm,Corrects(%),[P]T+,[I]T+,[N]T+,[P]T-,[I]T-,[N]T-";
+            results.add(header);
+            
             for(Instances dataset: instances){
                 for(Algorithm classifier: classifiers){
                     List<Thread> threads = new ArrayList<>();
@@ -83,14 +87,24 @@ public class Experiment {
                     }
                     
                     for(EvaluatorRunner er: evaluators){
-                        results.add(er.getDataset().relationName()+","+er.getClassifier().getName()+","+er.getEvaluation().pctCorrect());
+                        
+                        //Precisa alterar o cabeçalho na variável header antes dos fors caso alterações sejam realizadas neste bloco
+                        double pctCorrect = er.getEvaluation().pctCorrect();
+                        double truePositive0 = er.getEvaluation().truePositiveRate(0);
+                        double truePositive1 = er.getEvaluation().truePositiveRate(1);
+                        double truePositive2 = er.getEvaluation().truePositiveRate(2);
+                        double trueNegative0 = er.getEvaluation().trueNegativeRate(0);
+                        double trueNegative1 = er.getEvaluation().trueNegativeRate(1);
+                        double trueNegative2 = er.getEvaluation().trueNegativeRate(2);
+                        
+                        results.add(er.getDataset().relationName()+","+er.getClassifier().getName()+","+pctCorrect+","+truePositive0+","+truePositive1+","+truePositive2+","+trueNegative0+","+trueNegative1+","+trueNegative2);
                     }
                     
                 }
                 
             }
             
-            FileManager.save(results, EXPERIMENTS_DIR+experiment_folder+"results.txt");
+            FileManager.save(results, EXPERIMENTS_DIR+experiment_folder+"results.csv");
         }catch(Exception e){
             e.printStackTrace();
         }

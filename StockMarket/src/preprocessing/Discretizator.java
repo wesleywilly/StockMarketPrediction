@@ -16,9 +16,9 @@ import weka.core.*;
  */
 public class Discretizator {
 
-    private static final String V_ALTA = "P";
-    private static final String V_BAIXA = "N";
-    private static final String V_IGUAL = "I";
+    private static final String V_ALTA = "ALTA";
+    private static final String V_BAIXA = "BAIXA";
+    private static final String V_IGUAL = "IGUAL";
 
     private static final String V_ALTO = "A";
     private static final String V_MEDIO = "M";
@@ -105,6 +105,34 @@ public class Discretizator {
         return dataset;
     }
 
+    public static Instances discretize(Acao original, int window){
+        //Creating Dataset
+        Instances dataset = generateEmptyNominalDataSet(original.getSimbolo()+"("+window+")", original.getHistorico(), window);
+        
+        for (int i = window + 1; i < original.getHistorico().size(); i++) {
+            double[] values = new double[5 * (window + 1) - 4];
+            boolean equal = false;
+            
+            //Window
+            for (int j = 0; j <= window; j++) {
+                if (j == window) {
+                    //Fechamento
+                    if (i > 0) {
+                        if (original.getHistorico().get(i - (window - j)).getFechamento() > original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                            values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_ALTA);
+                        } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                            values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
+                        }else{
+                            equal = true;
+                        }
+                    }
+
+                }
+            
+        }
+    }
+    
+    
     /**
      * Transform numeric values to nominal using mean and standard deviation
      *
@@ -113,9 +141,9 @@ public class Discretizator {
      * @param window - get days before actual day and put as attributes
      * @return
      */
-    public static Instances discretize(Acao original, int window, boolean use_windows_for_means_and_standard_deviation) {
+    public static Instances discretize(Acao original, int window, boolean use_windows_for_means_and_standard_deviation, boolean equal_instances) {
         //Creating Dataset
-        Instances dataset = generateEmptyNominalDataSet(original.getSimbolo()+"("+window+")", original.getHistorico(), window);
+        Instances dataset = generateEmptyNominalDataSet(original.getSimbolo()+"("+window+")", original.getHistorico(), window, equal_instances);
 
         //Getting Means and Standard Deviation of all data
         List<double[]> msd;// = getMeansAndStandardDeviation(original.getHistorico());
@@ -133,8 +161,10 @@ public class Discretizator {
                     msd = getMeansAndStandardDeviation(original.getHistorico().subList(0, i));
                 }
             }
+            boolean equal = false;
             //Window
             for (int j = 0; j <= window; j++) {
+                 equal = false;
                 if (j == window) {
                     //Fechamento
                     if (i > 0) {
@@ -143,10 +173,21 @@ public class Discretizator {
                         } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
                             values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
                         } else {
-                            values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                            if(equal_instances){
+                                values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                            }else{
+                                values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
+                                equal = true;
+                            }
+                            
                         }
                     } else {
-                        values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                        if(equal_instances){
+                                values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                            }else{
+                                values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
+                                equal = true;
+                            }
                     }
 
                 } else {
@@ -194,19 +235,28 @@ public class Discretizator {
                             values[FECHAMENTO + (5 * j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
                         } else {
                             values[FECHAMENTO + (5 * j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                            equal = true;
                         }
                     } else {
                         values[FECHAMENTO + (5 * j)] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                        equal = true;
                     }
                 }
             }
-            dataset.add(new DenseInstance(1.0, values));
+            if(equal_instances){
+                dataset.add(new DenseInstance(1.0, values));
+            }else if(!equal){
+                dataset.add(new DenseInstance(1.0, values));
+            }
 
         }
         
         return dataset;
 
     }
+    
+    
+    
 
     private static Instances generateEmptyNominalDataSet(String name, List<Pregao> historico) {
         //Creating Dataset
@@ -247,7 +297,60 @@ public class Discretizator {
         return dataset;
     }
 
-    private static Instances generateEmptyNominalDataSet(String name, List<Pregao> historico, int window) {
+    private static Instances generateEmptyNominalDataSet(String name, List<Pregao> historico, int window){
+        if(window>0){
+            //Creating Dataset
+            //Attributes labels
+            ArrayList<String> labels = new ArrayList<>();
+            labels.add(V_ALTA);
+            labels.add(V_BAIXA);
+            
+            //Atributes
+            Attribute[] abertura = new Attribute[window];
+            Attribute[] baixa = new Attribute[window];
+            Attribute[] alta = new Attribute[window];
+            Attribute[] volume = new Attribute[window];
+            Attribute[] fechamento = new Attribute[window + 1];
+            
+            //Header
+            ArrayList<Attribute> attributes = new ArrayList<>();
+
+            for (int i = window; i >= 0; i--) {
+                if (i > 0) {
+                    abertura[window - i] = new Attribute("Abertura(" + (i * (-1)) + ")", labels);
+                    baixa[window - i] = new Attribute("Baixa(" + (i * (-1)) + ")", labels);
+                    alta[window - i] = new Attribute("Alta(" + (i * (-1)) + ")", labels);
+                    volume[window - i] = new Attribute("Volume(" + (i * (-1)) + ")", labels);
+                    fechamento[window - i] = new Attribute("Fechamento(" + (i * (-1)) + ")", labels);
+
+                    attributes.add(abertura[window - i]);
+                    attributes.add(baixa[window - i]);
+                    attributes.add(alta[window - i]);
+                    attributes.add(volume[window - i]);
+                    attributes.add(fechamento[window - i]);
+                } else {
+                    fechamento[window - i] = new Attribute("Fechamento", labels);
+                    attributes.add(fechamento[window - i]);
+                }
+            }
+            
+            //Dataset
+            Instances dataset = new Instances(name, attributes, 0);
+
+            //Defining class attribute
+            dataset.setClassIndex(FECHAMENTO + (5 * window) - 4);
+
+            return dataset;
+            
+            
+            
+        }else{
+            System.out.println("[DISCRETIZATOR] Invalid window value. it should be positive! ... Returning null...");
+            return null;
+        }
+    }
+    
+    private static Instances generateEmptyNominalDataSet(String name, List<Pregao> historico, int window, boolean equal_instances) {
         if (window == 0) {
             return generateEmptyNominalDataSet(name, historico);
         } else if (window > 0) {
@@ -262,7 +365,9 @@ public class Discretizator {
             //Class labels
             ArrayList<String> classLabels = new ArrayList<>();
             classLabels.add(V_ALTA);
-            classLabels.add(V_IGUAL);
+            if(equal_instances)
+                classLabels.add(V_IGUAL);
+            
             classLabels.add(V_BAIXA);
 
             //Atributes
