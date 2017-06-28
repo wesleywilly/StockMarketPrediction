@@ -83,7 +83,7 @@ public class Experiment {
                     }
                     
                     for(EvaluatorRunner er: evaluators){
-                        results.add(er.getDataset().relationName()+", "+er.getClassifier().getName()+", "+er.getEvaluation().pctCorrect());
+                        results.add(er.getDataset().relationName()+","+er.getClassifier().getName()+","+er.getEvaluation().pctCorrect());
                     }
                     
                 }
