@@ -58,10 +58,7 @@ public class testWindow {
            
             System.out.println("Window ["+(i+1)+"] = "+mean[i]);
         }
-        
-        
-        
-        
+
     }
 
 }

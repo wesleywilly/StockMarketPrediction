@@ -115,7 +115,7 @@ public class Discretizator {
      */
     public static Instances discretize(Acao original, int window, boolean use_windows_for_means_and_standard_deviation) {
         //Creating Dataset
-        Instances dataset = generateEmptyNominalDataSet(original.getSimbolo(), original.getHistorico(), window);
+        Instances dataset = generateEmptyNominalDataSet(original.getSimbolo()+"("+window+")", original.getHistorico(), window);
 
         //Getting Means and Standard Deviation of all data
         List<double[]> msd;// = getMeansAndStandardDeviation(original.getHistorico());
@@ -203,7 +203,7 @@ public class Discretizator {
             dataset.add(new DenseInstance(1.0, values));
 
         }
-
+        
         return dataset;
 
     }

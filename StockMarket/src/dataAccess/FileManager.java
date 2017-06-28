@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import weka.core.Instances;
@@ -91,6 +92,20 @@ public class FileManager {
             //saver.setDestination(new File("./data/test.arff"));   // **not** necessary in 3.5.4 and later
             saver.writeBatch();
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static void save(List<String> results, String file_path){
+        try{
+            PrintWriter writer = new PrintWriter(file_path, "UTF-8");
+            for(String line: results){
+                writer.println(line);
+            }
+            writer.close();
+            
+            
+        }catch(Exception e){
             e.printStackTrace();
         }
     }
