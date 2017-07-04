@@ -3,6 +3,8 @@ import dataAccess.FileManager;
 import dataModel.Acao;
 import datamining.Algorithm;
 import datamining.EvaluatorRunner;
+import experiment.ExperimentResults;
+import experiment.SingleResult;
 import java.util.ArrayList;
 import java.util.List;
 import preprocessing.Discretizator;
@@ -53,7 +55,7 @@ public class Experiment {
         System.out.print("Generating arff datasets...");
         List<Instances> instances = new ArrayList<>();
         for(int i = 0; i<MAX_WINDOWS;i++){
-            instances.add(Discretizator.discretize(vale, i+1, true,false));
+            instances.add(Discretizator.discretize(vale, i+1));
             FileManager.save(instances.get(i), EXPERIMENTS_DIR+experiment_folder+QUOTE+"("+(i+1)+").arff");
         }
         System.out.println(" Done!");
@@ -65,11 +67,8 @@ public class Experiment {
             List<Algorithm> classifiers = setClassifiers();
             System.out.println(" Done!");
             
-            System.out.println("Starting test...");
-            List<String> results = new ArrayList<String>();
-            
-            String header = "DataSet,Algorithm,Corrects(%),[P]T+,[I]T+,[N]T+,[P]T-,[I]T-,[N]T-";
-            results.add(header);
+            System.out.print("Starting test...");
+            ExperimentResults result = new ExperimentResults();
             
             for(Instances dataset: instances){
                 for(Algorithm classifier: classifiers){
@@ -82,34 +81,36 @@ public class Experiment {
                         evaluators.add(er);
                         threads.add(new Thread(er));
                     }
-                    for(Thread thread: threads){
+                    for(Thread thread: threads)
                         thread.run();
-                    }
                     
+                    for(Thread thread: threads)
+                        thread.join();
+                                
+                                
                     for(EvaluatorRunner er: evaluators){
+                        SingleResult sr = new SingleResult(er.getDataset().relationName(), 
+                                er.getClassifier().getName(),
+                                er.getEvaluation().pctCorrect(),
+                                er.getEvaluation().truePositiveRate(0),
+                                er.getEvaluation().truePositiveRate(1),
+                                er.getEvaluation().trueNegativeRate(0),
+                                er.getEvaluation().trueNegativeRate(1));
                         
-                        //Precisa alterar o cabeçalho na variável header antes dos fors caso alterações sejam realizadas neste bloco
-                        double pctCorrect = er.getEvaluation().pctCorrect();
-                        double truePositive0 = er.getEvaluation().truePositiveRate(0);
-                        double truePositive1 = er.getEvaluation().truePositiveRate(1);
-                        double truePositive2 = er.getEvaluation().truePositiveRate(2);
-                        double trueNegative0 = er.getEvaluation().trueNegativeRate(0);
-                        double trueNegative1 = er.getEvaluation().trueNegativeRate(1);
-                        double trueNegative2 = er.getEvaluation().trueNegativeRate(2);
                         
-                        results.add(er.getDataset().relationName()+","+er.getClassifier().getName()+","+pctCorrect+","+truePositive0+","+truePositive1+","+truePositive2+","+trueNegative0+","+trueNegative1+","+trueNegative2);
+                        result.addResult(sr);
                     }
                     
                 }
                 
             }
             
-            FileManager.save(results, EXPERIMENTS_DIR+experiment_folder+"results.csv");
+            result.toCSV(ExperimentResults.ACCURACY,EXPERIMENTS_DIR+experiment_folder+"accuracy.csv");
         }catch(Exception e){
             e.printStackTrace();
         }
         
-        
+        System.out.println(" Done!");
     }
     
     private static List<Algorithm> setClassifiers() throws Exception, Throwable{

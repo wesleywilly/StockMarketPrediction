@@ -4,10 +4,14 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/test/Experiment.java</file>
+            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/experiment/ExperimentResults.java</file>
+            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/datamining/Results.java</file>
             <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/dataAccess/FileManager.java</file>
+            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/test/BayesNet.java</file>
             <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/datamining/Algorithm.java</file>
             <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/preprocessing/Discretizator.java</file>
             <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/datamining/EvaluatorRunner.java</file>
+            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/experiment/Result.java</file>
         </group>
     </open-files>
 </project-private>

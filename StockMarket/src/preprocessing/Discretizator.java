@@ -16,9 +16,9 @@ import weka.core.*;
  */
 public class Discretizator {
 
-    private static final String V_ALTA = "ALTA";
-    private static final String V_BAIXA = "BAIXA";
-    private static final String V_IGUAL = "IGUAL";
+    private static final String V_ALTA = "A";
+    private static final String V_BAIXA = "B";
+    private static final String V_IGUAL = "I";
 
     private static final String V_ALTO = "A";
     private static final String V_MEDIO = "M";
@@ -105,45 +105,93 @@ public class Discretizator {
         return dataset;
     }
 
-    public static Instances discretize(Acao original, int window){
+    public static Instances discretize(Acao original, int window) {
         //Creating Dataset
-        Instances dataset = generateEmptyNominalDataSet(original.getSimbolo()+"("+window+")", original.getHistorico(), window);
-        
+        Instances dataset = generateEmptyNominalDataSet(original.getSimbolo() + "(" + window + ")", original.getHistorico(), window);
+
         for (int i = window + 1; i < original.getHistorico().size(); i++) {
             double[] values = new double[5 * (window + 1) - 4];
             boolean equal = false;
-            
+
             //Window
             for (int j = 0; j <= window; j++) {
                 if (j == window) {
-                    //Fechamento
+                    if (original.getHistorico().get(i - (window - j)).getFechamento() > original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                        values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_ALTA);
+                    } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                        values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
+                    } else {
+                        equal = true;
+                    }
+                } else {
+
                     if (i > 0) {
+
+                        //Abertura
+                        if (original.getHistorico().get(i - (window - j)).getAbertura() > original.getHistorico().get(i - (window - j) - 1).getAbertura()) {
+                            values[ABERTURA + (5 * j)] = dataset.attribute(ABERTURA).indexOfValue(V_ALTA);
+                        } else if (original.getHistorico().get(i - (window - j)).getAbertura() < original.getHistorico().get(i - (window - j) - 1).getAbertura()) {
+                            values[ABERTURA + (5 * j)] = dataset.attribute(ABERTURA).indexOfValue(V_BAIXA);
+                        } else {
+                            values[ABERTURA + (5 * j)] = dataset.attribute(ABERTURA).indexOfValue(V_IGUAL);
+                        }
+
+                        //Baixa
+                        if (original.getHistorico().get(i - (window - j)).getBaixa() > original.getHistorico().get(i - (window - j) - 1).getBaixa()) {
+                            values[BAIXA + (5 * j)] = dataset.attribute(BAIXA).indexOfValue(V_ALTA);
+                        } else if (original.getHistorico().get(i - (window - j)).getBaixa() < original.getHistorico().get(i - (window - j) - 1).getBaixa()) {
+                            values[BAIXA + (5 * j)] = dataset.attribute(BAIXA).indexOfValue(V_BAIXA);
+                        } else {
+                            values[BAIXA + (5 * j)] = dataset.attribute(BAIXA).indexOfValue(V_IGUAL);
+                        }
+
+                        //Alta
+                        if (original.getHistorico().get(i - (window - j)).getAlta() > original.getHistorico().get(i - (window - j) - 1).getAlta()) {
+                            values[ALTA + (5 * j)] = dataset.attribute(ALTA).indexOfValue(V_ALTA);
+                        } else if (original.getHistorico().get(i - (window - j)).getAlta() < original.getHistorico().get(i - (window - j) - 1).getAlta()) {
+                            values[ALTA + (5 * j)] = dataset.attribute(ALTA).indexOfValue(V_BAIXA);
+                        } else {
+                            values[ALTA + (5 * j)] = dataset.attribute(ALTA).indexOfValue(V_IGUAL);
+                        }
+
+                        //Volume
+                        if (original.getHistorico().get(i - (window - j)).getVolume() > original.getHistorico().get(i - (window - j) - 1).getVolume()) {
+                            values[VOLUME + (5 * j)] = dataset.attribute(VOLUME).indexOfValue(V_ALTA);
+                        } else if (original.getHistorico().get(i - (window - j)).getVolume() < original.getHistorico().get(i - (window - j) - 1).getVolume()) {
+                            values[VOLUME + (5 * j)] = dataset.attribute(VOLUME).indexOfValue(V_BAIXA);
+                        } else {
+                            values[VOLUME + (5 * j)] = dataset.attribute(VOLUME).indexOfValue(V_IGUAL);
+                        }
+
+                        //Fechamento
                         if (original.getHistorico().get(i - (window - j)).getFechamento() > original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
                             values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_ALTA);
                         } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
                             values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
-                        }else{
-                            equal = true;
+                        } else {
+                            values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
                         }
                     }
-
                 }
-            
+            }
+            if (!equal) {
+                dataset.add(new DenseInstance(1.0, values));
+            }
         }
+        return dataset;
     }
-    
-    
+
     /**
-     * Transform numeric values to nominal using mean and standard deviation
      *
-     * @param original - Original dataset
-     * @param name - Dataset name
-     * @param window - get days before actual day and put as attributes
+     * @param original
+     * @param window
+     * @param use_windows_for_means_and_standard_deviation
+     * @param equal_instances
      * @return
      */
     public static Instances discretize(Acao original, int window, boolean use_windows_for_means_and_standard_deviation, boolean equal_instances) {
         //Creating Dataset
-        Instances dataset = generateEmptyNominalDataSet(original.getSimbolo()+"("+window+")", original.getHistorico(), window, equal_instances);
+        Instances dataset = generateEmptyNominalDataSet(original.getSimbolo() + "(" + window + ")", original.getHistorico(), window, equal_instances);
 
         //Getting Means and Standard Deviation of all data
         List<double[]> msd;// = getMeansAndStandardDeviation(original.getHistorico());
@@ -164,7 +212,7 @@ public class Discretizator {
             boolean equal = false;
             //Window
             for (int j = 0; j <= window; j++) {
-                 equal = false;
+                equal = false;
                 if (j == window) {
                     //Fechamento
                     if (i > 0) {
@@ -173,21 +221,21 @@ public class Discretizator {
                         } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
                             values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
                         } else {
-                            if(equal_instances){
+                            if (equal_instances) {
                                 values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
-                            }else{
+                            } else {
                                 values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
                                 equal = true;
                             }
-                            
+
                         }
                     } else {
-                        if(equal_instances){
-                                values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
-                            }else{
-                                values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
-                                equal = true;
-                            }
+                        if (equal_instances) {
+                            values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);
+                        } else {
+                            values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
+                            equal = true;
+                        }
                     }
 
                 } else {
@@ -243,20 +291,17 @@ public class Discretizator {
                     }
                 }
             }
-            if(equal_instances){
+            if (equal_instances) {
                 dataset.add(new DenseInstance(1.0, values));
-            }else if(!equal){
+            } else if (!equal) {
                 dataset.add(new DenseInstance(1.0, values));
             }
 
         }
-        
+
         return dataset;
 
     }
-    
-    
-    
 
     private static Instances generateEmptyNominalDataSet(String name, List<Pregao> historico) {
         //Creating Dataset
@@ -297,21 +342,28 @@ public class Discretizator {
         return dataset;
     }
 
-    private static Instances generateEmptyNominalDataSet(String name, List<Pregao> historico, int window){
-        if(window>0){
+    private static Instances generateEmptyNominalDataSet(String name, List<Pregao> historico, int window) {
+        if (window > 0) {
             //Creating Dataset
             //Attributes labels
             ArrayList<String> labels = new ArrayList<>();
             labels.add(V_ALTA);
             labels.add(V_BAIXA);
+            labels.add(V_IGUAL);
             
+            //Attributes labels
+            ArrayList<String> class_labels = new ArrayList<>();
+            class_labels.add(V_ALTA);
+            class_labels.add(V_BAIXA);
+           
+
             //Atributes
             Attribute[] abertura = new Attribute[window];
             Attribute[] baixa = new Attribute[window];
             Attribute[] alta = new Attribute[window];
             Attribute[] volume = new Attribute[window];
             Attribute[] fechamento = new Attribute[window + 1];
-            
+
             //Header
             ArrayList<Attribute> attributes = new ArrayList<>();
 
@@ -329,11 +381,11 @@ public class Discretizator {
                     attributes.add(volume[window - i]);
                     attributes.add(fechamento[window - i]);
                 } else {
-                    fechamento[window - i] = new Attribute("Fechamento", labels);
+                    fechamento[window - i] = new Attribute("Fechamento", class_labels);
                     attributes.add(fechamento[window - i]);
                 }
             }
-            
+
             //Dataset
             Instances dataset = new Instances(name, attributes, 0);
 
@@ -341,15 +393,13 @@ public class Discretizator {
             dataset.setClassIndex(FECHAMENTO + (5 * window) - 4);
 
             return dataset;
-            
-            
-            
-        }else{
+
+        } else {
             System.out.println("[DISCRETIZATOR] Invalid window value. it should be positive! ... Returning null...");
             return null;
         }
     }
-    
+
     private static Instances generateEmptyNominalDataSet(String name, List<Pregao> historico, int window, boolean equal_instances) {
         if (window == 0) {
             return generateEmptyNominalDataSet(name, historico);
@@ -365,9 +415,10 @@ public class Discretizator {
             //Class labels
             ArrayList<String> classLabels = new ArrayList<>();
             classLabels.add(V_ALTA);
-            if(equal_instances)
+            if (equal_instances) {
                 classLabels.add(V_IGUAL);
-            
+            }
+
             classLabels.add(V_BAIXA);
 
             //Atributes
