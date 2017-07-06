@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<smile version="1.0" id="Unnamed" numsamples="1000" discsamples="10000">
+	<nodes>
+		<cpt id="Fechamento">
+			<state id="Baixa" />
+			<state id="Alta" />
+			<probabilities>0.2 0.8</probabilities>
+		</cpt>
+		<cpt id="Abertura">
+			<state id="Baixa" />
+			<state id="Igual" />
+			<state id="Alta" />
+			<parents>Fechamento</parents>
+			<probabilities>0.3 0.3 0.4 0.4 0.4 0.2</probabilities>
+		</cpt>
+		<cpt id="Minima">
+			<state id="Baixa" />
+			<state id="Igual" />
+			<state id="Alta" />
+			<parents>Fechamento</parents>
+			<probabilities>0.3 0.3 0.4 0.4 0.4 0.2</probabilities>
+		</cpt>
+		<cpt id="Maxima">
+			<state id="Baixa" />
+			<state id="Igual" />
+			<state id="Alta" />
+			<parents>Fechamento</parents>
+			<probabilities>0.3 0.3 0.4 0.4 0.4 0.2</probabilities>
+		</cpt>
+		<cpt id="Volume">
+			<state id="Baixa" />
+			<state id="Igual" />
+			<state id="Alta" />
+			<parents>Fechamento</parents>
+			<probabilities>0.3 0.3 0.4 0.4 0.4 0.2</probabilities>
+		</cpt>
+	</nodes>
+	<extensions>
+		<genie version="1.0" app="SMILE Apr 10 2014" name="Unnamed" faultnameformat="nodestate">
+			<node id="Fechamento">
+				<name>Fechamento</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>240 240 290 270</position>
+			</node>
+			<node id="Abertura">
+				<name>Abertura</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>80 90 130 120</position>
+			</node>
+			<node id="Minima">
+				<name>Minima</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>160 90 210 120</position>
+			</node>
+			<node id="Maxima">
+				<name>Maxima</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>320 90 370 120</position>
+			</node>
+			<node id="Volume">
+				<name>Volume</name>
+				<interior color="e5f6f7" />
+				<outline color="0000bb" />
+				<font color="000000" name="MS Sans Serif" size="8" />
+				<position>400 90 450 120</position>
+			</node>
+		</genie>
+	</extensions>
+</smile>

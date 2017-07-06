@@ -116,9 +116,9 @@ public class Discretizator {
             //Window
             for (int j = 0; j <= window; j++) {
                 if (j == window) {
-                    if (original.getHistorico().get(i - (window - j)).getFechamento() > original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                    if (original.getHistorico().get(i - (window - j)).getFechamento() > original.getHistorico().get(i - (window - j)).getAbertura()) {
                         values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_ALTA);
-                    } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                    } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j)).getAbertura()) {
                         values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
                     } else {
                         equal = true;
@@ -164,9 +164,9 @@ public class Discretizator {
                         }
 
                         //Fechamento
-                        if (original.getHistorico().get(i - (window - j)).getFechamento() > original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                        if (original.getHistorico().get(i - (window - j)).getFechamento() > original.getHistorico().get(i - (window - j)).getAbertura()) {
                             values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_ALTA);
-                        } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j) - 1).getFechamento()) {
+                        } else if (original.getHistorico().get(i - (window - j)).getFechamento() < original.getHistorico().get(i - (window - j)).getAbertura()) {
                             values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_BAIXA);
                         } else {
                             values[FECHAMENTO + (5 * j) - 4] = dataset.attribute(FECHAMENTO).indexOfValue(V_IGUAL);

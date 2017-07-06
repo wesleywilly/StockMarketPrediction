@@ -5,8 +5,11 @@ import datamining.Algorithm;
 import datamining.EvaluatorRunner;
 import experiment.ExperimentResults;
 import experiment.SingleResult;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
+import javafx.util.converter.DateTimeStringConverter;
 import preprocessing.Discretizator;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
@@ -33,6 +36,10 @@ public class Experiment {
     private static final String EXPERIMENTS_DIR = "/home/wesley/git_repository/StockMarketPrediction/StockMarket/experiments/";
     private static final String RAW_PATH = "/home/wesley/git_repository/StockMarketPrediction/StockMarket/rawdata/VALE.csv";
     
+    private static final String DATASETS = "datasets/";
+    private static final String NETS = "nets/";
+    private static final String RESULTS = "results/";
+    
     private static final int MAX_WINDOWS = 15;
     private static final int MAX_TEST = 35;
     
@@ -43,6 +50,7 @@ public class Experiment {
     public static void main(String[] args) throws Throwable {
         
         String experiment_folder = String.valueOf(System.currentTimeMillis())+"/";
+        System.out.println("Experiment: "+experiment_folder);
         
         System.out.print("Loading Raw data...");
         Acao vale = FileManager.loadRawData(COMPANY, QUOTE, RAW_PATH);
@@ -56,7 +64,7 @@ public class Experiment {
         List<Instances> instances = new ArrayList<>();
         for(int i = 0; i<MAX_WINDOWS;i++){
             instances.add(Discretizator.discretize(vale, i+1));
-            FileManager.save(instances.get(i), EXPERIMENTS_DIR+experiment_folder+QUOTE+"("+(i+1)+").arff");
+            FileManager.save(instances.get(i), EXPERIMENTS_DIR+experiment_folder+DATASETS+QUOTE+"("+(i+1)+").arff");
         }
         System.out.println(" Done!");
         
@@ -67,11 +75,14 @@ public class Experiment {
             List<Algorithm> classifiers = setClassifiers();
             System.out.println(" Done!");
             
-            System.out.print("Starting test...");
+            System.out.println("["+LocalDateTime.now().toString()+"] Evaluation started...");
             ExperimentResults result = new ExperimentResults();
-            
+            int indexDS = 0;
             for(Instances dataset: instances){
+                indexDS++;
+                int indexA = 0;
                 for(Algorithm classifier: classifiers){
+                    System.out.print("\rDataset: "+(indexDS)+"/"+instances.size()+" | Classifiers: "+(indexA+=1)+"/"+classifiers.size());
                     List<Thread> threads = new ArrayList<>();
                     List<EvaluatorRunner> evaluators = new ArrayList<>();
                     
@@ -86,8 +97,7 @@ public class Experiment {
                     
                     for(Thread thread: threads)
                         thread.join();
-                                
-                                
+
                     for(EvaluatorRunner er: evaluators){
                         SingleResult sr = new SingleResult(er.getDataset().relationName(), 
                                 er.getClassifier().getName(),
@@ -105,12 +115,21 @@ public class Experiment {
                 
             }
             
+            System.out.println("\n["+LocalDateTime.now().toString()+"] Done!");
+            
+            System.out.print("Saving results...");
             result.toCSV(ExperimentResults.ACCURACY,EXPERIMENTS_DIR+experiment_folder+"accuracy.csv");
+            result.toCSV(ExperimentResults.TP,EXPERIMENTS_DIR+experiment_folder+"truepositives.csv");
+            result.toCSV(ExperimentResults.TN,EXPERIMENTS_DIR+experiment_folder+"truenegatives.csv");
+            
+            System.out.println(" Done!");
+            System.out.println("\nExperiment successfully completed!!!\n");
+            
         }catch(Exception e){
             e.printStackTrace();
         }
         
-        System.out.println(" Done!");
+        
     }
     
     private static List<Algorithm> setClassifiers() throws Exception, Throwable{

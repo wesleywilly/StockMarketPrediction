@@ -1,0 +1,9 @@
+1 - Copy Files to \opt\smile\
+
+2 - Follow the Steps :-
+
+==>Right click on the Project
+==>Properties
+==>Click on RUN
+==>VM Options : -Djava.library.path="C:\Your Directory where Dll is present"
+==>Ok
