@@ -40,7 +40,7 @@ public class Experiment {
     private static final String NETS = "nets/";
     private static final String RESULTS = "results/";
     
-    private static final int MAX_WINDOWS = 15;
+    private static final int MAX_WINDOWS = 30;
     private static final int MAX_TEST = 35;
     
     
