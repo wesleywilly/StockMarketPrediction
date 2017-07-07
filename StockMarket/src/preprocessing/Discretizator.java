@@ -369,11 +369,11 @@ public class Discretizator {
 
             for (int i = window; i >= 0; i--) {
                 if (i > 0) {
-                    abertura[window - i] = new Attribute("Abertura(" + (i * (-1)) + ")", labels);
-                    baixa[window - i] = new Attribute("Baixa(" + (i * (-1)) + ")", labels);
-                    alta[window - i] = new Attribute("Alta(" + (i * (-1)) + ")", labels);
-                    volume[window - i] = new Attribute("Volume(" + (i * (-1)) + ")", labels);
-                    fechamento[window - i] = new Attribute("Fechamento(" + (i * (-1)) + ")", labels);
+                    abertura[window - i] = new Attribute("Abertura" + (i * (-1)), labels);
+                    baixa[window - i] = new Attribute("Baixa" + (i * (-1)), labels);
+                    alta[window - i] = new Attribute("Alta" + (i * (-1)), labels);
+                    volume[window - i] = new Attribute("Volume" + (i * (-1)), labels);
+                    fechamento[window - i] = new Attribute("Fechamento" + (i * (-1)), labels);
 
                     attributes.add(abertura[window - i]);
                     attributes.add(baixa[window - i]);

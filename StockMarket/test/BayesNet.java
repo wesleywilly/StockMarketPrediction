@@ -11,11 +11,30 @@ import smile.Network;
  * @author wesley
  */
 public class BayesNet {
-
+    private static final String COMPANY = "Vale S/A";
+    private static final String QUOTE = "VALE5";
+    private static final String DATASET_DIR = "/home/wesley/git_repository/StockMarketPrediction/StockMarket/dataset/";
+    private static final String EXPERIMENTS_DIR = "/home/wesley/git_repository/StockMarketPrediction/StockMarket/experiments/";
+    private static final String RAW_PATH = "/home/wesley/git_repository/StockMarketPrediction/StockMarket/rawdata/VALE.csv";
+    
+    private static final String DATASETS = "datasets/";
+    private static final String NETS = "nets/";
+    private static final String RESULTS = "results/";
+    
+    private static final int MAX_WINDOWS = 15;
+    private static final int MAX_TEST = 35;
+    
+    
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        
+        
+        
+    }
+    
+    private static Network generate(){
         // WIKI: https://dslpitt.org/genie/wiki/JSMILE_and_Smile.NET
         //Tutorial1: https://dslpitt.org/genie/wiki/Java_Tutorial_1:_Creating_a_Bayesian_Network
 
@@ -97,6 +116,8 @@ public class BayesNet {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
+        return net;
     }
-
+    
 }
