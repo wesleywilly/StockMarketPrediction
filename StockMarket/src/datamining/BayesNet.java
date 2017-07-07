@@ -83,16 +83,59 @@ public class BayesNet {
                 }
             }
             net.addArc(lastGroup.get(lastGroup.size()-1), classAttribute);
+            
         }
-        
-        System.out.println(net.writeString());
         
         /* PROBABILIDADES */
         
-        //Probabilidade atributo classe
-        double[] definitionFechamento = {0.2, 0.8};
-        net.setNodeDefinition("Fechamento", definitionFechamento);
+        
+        for(String attribute: net.getAllNodeIds()){
+            List<Double> probabilities = new ArrayList<>();
+            
+            for(String parent: net.getParentIds(attribute)){
+                for(int i=0; i<net.getOutcomeCount(parent);i++){
+                    for(int j=0;j<net.getOutcomeCount(attribute);j++){
+                        
+                        int child_index = 0;
+                        int parent_index = 0;
+                        
+                        for(int k=0; k<dataset.numAttributes();k++){
+                            if(dataset.attribute(k).name().equals(attribute)){
+                                child_index = k;
+                            }
+                            if(dataset.attribute(k).name().equals(parent)){
+                                parent_index = k;
+                            }
+                        }
+                        
+                        
+                        double p=0;
+                        for(int l =0 ; l<dataset.numInstances();l++){
+                            
+                            
+                            
+                            if(dataset.instance(l).value(parent_index) == i 
+                                    && dataset.instance(l).value(child_index) == j){
+                                p+=1;
+                            }
+                        }
+                        p = p/dataset.numInstances();
+                        probabilities.add(p);
+                        
+                    }
+                }
+            }
+            double[] definition = new double[probabilities.size()];
+            for(int i =0 ; i<probabilities.size();i++){
+                definition[i] = probabilities.get(i);
+            }
+            net.setNodeDefinition(attribute, definition);
+        }
+        
+      net.writeFile("DNB..xdsl");
         
     }
+    
+    
 
 }
