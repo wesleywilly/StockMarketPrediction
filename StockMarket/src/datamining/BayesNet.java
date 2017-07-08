@@ -69,73 +69,170 @@ public class BayesNet {
                 net.deleteOutcome(attribute, 0);
             }
         }
-        
+
         //Arcos
-        if(type >= 0){
+        if (type >= 0) {
             //Daily Naive
-            List<String> lastGroup = attributes.get(attributes.size()-1);
-            for(int i=0; i<lastGroup.size();i++){
-                if((i+1)<lastGroup.size()){
+            List<String> lastGroup = attributes.get(attributes.size() - 1);
+            for (int i = 0; i < lastGroup.size(); i++) {
+                if ((i + 1) < lastGroup.size()) {
                     net.addArc(lastGroup.get(i), lastGroup.get(i));
                 }
-                for(int j=0; j<attributes.size()-1;j++){
+                for (int j = 0; j < attributes.size() - 1; j++) {
                     net.addArc(attributes.get(j).get(i), lastGroup.get(i));
                 }
             }
-            net.addArc(lastGroup.get(lastGroup.size()-1), classAttribute);
-            
+            net.addArc(lastGroup.get(lastGroup.size() - 1), classAttribute);
+
         }
-        
+
         /* PROBABILIDADES */
-        
-        
-        for(String attribute: net.getAllNodeIds()){
+        for (String attribute : net.getAllNodeIds()) {
             List<Double> probabilities = new ArrayList<>();
-            
-            for(String parent: net.getParentIds(attribute)){
-                for(int i=0; i<net.getOutcomeCount(parent);i++){
-                    for(int j=0;j<net.getOutcomeCount(attribute);j++){
-                        
-                        int child_index = 0;
-                        int parent_index = 0;
-                        
-                        for(int k=0; k<dataset.numAttributes();k++){
-                            if(dataset.attribute(k).name().equals(attribute)){
-                                child_index = k;
+
+            if (net.getParentIds(attribute).length > 0) {
+                for (String parent : net.getParentIds(attribute)) {
+                    for (int i = 0; i < net.getOutcomeCount(parent); i++) {
+                        for (int j = 0; j < net.getOutcomeCount(attribute); j++) {
+
+                            int child_index = 0;
+                            int parent_index = 0;
+
+                            for (int k = 0; k < dataset.numAttributes(); k++) {
+                                if (dataset.attribute(k).name().equals(attribute)) {
+                                    child_index = k;
+                                }
+                                if (dataset.attribute(k).name().equals(parent)) {
+                                    parent_index = k;
+                                }
                             }
-                            if(dataset.attribute(k).name().equals(parent)){
-                                parent_index = k;
+
+                            double p = 0;
+                            for (int l = 0; l < dataset.numInstances(); l++) {
+
+                                if (dataset.instance(l).value(parent_index) == i
+                                        && dataset.instance(l).value(child_index) == j) {
+                                    p += 1;
+                                }
                             }
+                            p = p / dataset.numInstances();
+                            probabilities.add(p);
+
                         }
-                        
-                        
-                        double p=0;
-                        for(int l =0 ; l<dataset.numInstances();l++){
-                            
-                            
-                            
-                            if(dataset.instance(l).value(parent_index) == i 
-                                    && dataset.instance(l).value(child_index) == j){
-                                p+=1;
-                            }
-                        }
-                        p = p/dataset.numInstances();
-                        probabilities.add(p);
-                        
                     }
+                }
+            } else {
+                for (int j = 0; j < net.getOutcomeCount(attribute); j++) {
+
+                    int child_index = 0;
+
+                    for (int k = 0; k < dataset.numAttributes(); k++) {
+                        if (dataset.attribute(k).name().equals(attribute)) {
+                            child_index = k;
+                        }
+
+                    }
+
+                    double p = 0;
+                    for (int l = 0; l < dataset.numInstances(); l++) {
+
+                        if (dataset.instance(l).value(child_index) == j) {
+                            p += 1;
+                        }
+                    }
+                    p = p / dataset.numInstances();
+                    probabilities.add(p);
+
                 }
             }
             double[] definition = new double[probabilities.size()];
-            for(int i =0 ; i<probabilities.size();i++){
-                definition[i] = probabilities.get(i);
+            for (int i = 0; i < probabilities.size(); i++) {
+                if (probabilities.get(i) != 0) {
+                    definition[i] = probabilities.get(i);
+                } else {
+                    definition[i] = 0.0000000000000001;
+                }
             }
             net.setNodeDefinition(attribute, definition);
         }
-        
-      net.writeFile("DNB..xdsl");
-        
+        net.writeFile("DNB.xdsl");
     }
-    
-    
+
+    private double[] getDefinition(String parent, String attribute, Instances dataset) {
+        List<Double> probabilities = new ArrayList<>();
+
+        for (int i = 0; i < net.getOutcomeCount(parent); i++) {
+            for (int j = 0; j < net.getOutcomeCount(attribute); j++) {
+
+                int child_index = 0;
+                int parent_index = 0;
+
+                for (int k = 0; k < dataset.numAttributes(); k++) {
+                    if (dataset.attribute(k).name().equals(attribute)) {
+                        child_index = k;
+                    }
+                    if (dataset.attribute(k).name().equals(parent)) {
+                        parent_index = k;
+                    }
+                }
+
+                double p = 0;
+                for (int l = 0; l < dataset.numInstances(); l++) {
+
+                    if (dataset.instance(l).value(parent_index) == i
+                            && dataset.instance(l).value(child_index) == j) {
+                        p += 1;
+                    }
+                }
+                p = p / dataset.numInstances();
+                probabilities.add(p);
+
+            }
+        }
+        double[] definition = new double[probabilities.size()];
+        for (int i = 0; i < probabilities.size(); i++) {
+            if (probabilities.get(i) != 0) {
+                definition[i] = probabilities.get(i);
+            } else {
+                definition[i] = 0.0000000000000001;
+            }
+        }
+        return definition;
+    }
+
+    private double[] getDefinition(String attribute, Instances dataset) {
+        List<Double> probabilities = new ArrayList<>();
+        for (int j = 0; j < net.getOutcomeCount(attribute); j++) {
+
+            int child_index = 0;
+
+            for (int k = 0; k < dataset.numAttributes(); k++) {
+                if (dataset.attribute(k).name().equals(attribute)) {
+                    child_index = k;
+                }
+
+            }
+
+            double p = 0;
+            for (int l = 0; l < dataset.numInstances(); l++) {
+
+                if (dataset.instance(l).value(child_index) == j) {
+                    p += 1;
+                }
+            }
+            p = p / dataset.numInstances();
+            probabilities.add(p);
+
+        }
+        double[] definition = new double[probabilities.size()];
+        for (int i = 0; i < probabilities.size(); i++) {
+            if (probabilities.get(i) != 0) {
+                definition[i] = probabilities.get(i);
+            } else {
+                definition[i] = 0.0000000000000001;
+            }
+        }
+        return definition;
+    }
 
 }

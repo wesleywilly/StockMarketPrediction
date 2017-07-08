@@ -3,13 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/test/Experiment.java</file>
-            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/experiment/ExperimentResults.java</file>
-            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/dataAccess/FileManager.java</file>
-            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/test/BayesNet.java</file>
-            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/datamining/Algorithm.java</file>
-            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/preprocessing/Discretizator.java</file>
-            <file>file:/home/wesley/git_repository/StockMarketPrediction/StockMarket/src/datamining/EvaluatorRunner.java</file>
+            <file>file:/home/wesley/Git/StockMarketPrediction/StockMarket/test/BayesNetExample.java</file>
+            <file>file:/home/wesley/Git/StockMarketPrediction/StockMarket/src/datamining/BayesNet.java</file>
+            <file>file:/home/wesley/Git/StockMarketPrediction/StockMarket/test/ExperimentBayesNet.java</file>
         </group>
     </open-files>
 </project-private>
