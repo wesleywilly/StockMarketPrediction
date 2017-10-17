@@ -88,7 +88,7 @@ public class BayesNet {
         
         /* PROBABILIDADES */
         
-        
+        /*
         for(String attribute: net.getAllNodeIds()){
             List<Double> probabilities = new ArrayList<>();
             
@@ -130,9 +130,9 @@ public class BayesNet {
                 definition[i] = probabilities.get(i);
             }
             net.setNodeDefinition(attribute, definition);
-        }
+        }*/
         
-      net.writeFile("DNB..xdsl");
+      net.writeFile("DNB-"+dataset.relationName()+".xdsl");
         
     }
     
