@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import preprocessing.Discretizator;
 import weka.classifiers.bayes.BayesNet;
+import weka.classifiers.bayes.net.BayesNetGenerator;
 import weka.core.Instances;
 
 /*
