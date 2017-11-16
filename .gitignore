@@ -23,7 +23,7 @@ hs_err_pid*
 /StockMarket/dist/
 
 # Minhas alterações
-StockMarket/build/built-jar.properties
-StockMarket/nbproject/private/private.properties
-StockMarket/nbproject/private/private.xml
-StockMarket/experiments/
+/StockMarket/build/built-jar.properties
+/StockMarket/nbproject/private/private.properties
+/StockMarket/nbproject/private/private.xml
+/StockMarket/experiments/
