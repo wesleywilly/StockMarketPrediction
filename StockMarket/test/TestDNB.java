@@ -21,9 +21,9 @@ import weka.core.Instances;
 public class TestDNB {
     private static final String COMPANY = "Vale S/A";
     private static final String QUOTE = "VALE5";
-    private static final String DATASET_DIR = "/home/wesley/git/StockMarketPrediction/StockMarket/dataset/";
-    private static final String EXPERIMENTS_DIR = "/home/wesley/git/StockMarketPrediction/StockMarket/experiments/";
-    private static final String RAW_PATH = "/home/wesley/git/StockMarketPrediction/StockMarket/rawdata/VALE.csv";
+    private static final String DATASET_DIR = "./dataset/";
+    private static final String EXPERIMENTS_DIR = "./experiments/";
+    private static final String RAW_PATH = "./rawdata/VALE.csv";
     
     private static final String DATASETS = "datasets/";
     private static final String NETS = "nets/";
